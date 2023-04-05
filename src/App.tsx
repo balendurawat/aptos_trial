@@ -1,24 +1,36 @@
 import React from 'react';
-import logo from './logo.svg';
 import './App.css';
+import { Types, AptosClient } from 'aptos';
+
+const client = new AptosClient('https://fullnode.devnet.aptoslabs.com/v1');
 
 function App() {
+  // Retrieve aptos.account on initial render and store it.
+  const [address, setAddress] = React.useState<string | null>(null);
+  
+  /**
+   * init function
+   */
+  const init = async() => {
+    // connect
+    const { address, publicKey } = await window.aptos.connect();
+    setAddress(address);
+  }
+  
+  React.useEffect(() => {
+     init();
+  }, []);
+
+  const [account, setAccount] = React.useState<Types.AccountData | null>(null);
+  React.useEffect(() => {
+    if (!address) return;
+    client.getAccount(address).then(setAccount);
+  }, [address]);
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <p>Account Address: <code>{ address }</code></p>
+      <p>Sequence Number: <code>{ account?.sequence_number }</code></p>
     </div>
   );
 }
